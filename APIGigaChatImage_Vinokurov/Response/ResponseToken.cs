@@ -9,13 +9,7 @@ namespace APIGigaChatImage_Vinokurov.Response
 {
     public class ResponseToken
     {
-        /// <summary>
-        /// Token
-        /// </summary>
         public string access_token { get; set; }
-        /// <summary>
-        /// Cpow korpa token wcrekaer
-        /// </summary>
         public string expires_at { get; set; }
     }
 }
