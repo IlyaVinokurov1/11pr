@@ -1,0 +1,120 @@
+﻿<Window x:Class="APIGigaChatImageWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:APIGigaChatImageWPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock Grid.Row="0" 
+                   Text="Генератор обоев рабочего стола" 
+                   FontSize="22" 
+                   FontWeight="Bold" 
+                   HorizontalAlignment="Center" 
+                   Margin="0,0,0,20"/>
+
+        <!-- Описание -->
+        <GroupBox Grid.Row="1" Header="Описание изображения" Margin="0,0,0,10">
+            <TextBox x:Name="DescriptionTextBox" 
+                     Height="60" 
+                     TextWrapping="Wrap" 
+                     VerticalScrollBarVisibility="Auto"
+                     Text="Введите описание для генерации"/>
+        </GroupBox>
+
+        <!-- Параметры для оценки "ХОРОШО" -->
+        <Grid Grid.Row="2" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Стиль -->
+            <GroupBox Grid.Column="0" Header="Стиль" Margin="5,0">
+                <ComboBox x:Name="StyleComboBox" SelectedIndex="0">
+                    <ComboBoxItem>Реалистичный</ComboBoxItem>
+                    <ComboBoxItem>Художественный</ComboBoxItem>
+                    <ComboBoxItem>Минимализм</ComboBoxItem>
+                    <ComboBoxItem>Абстрактный</ComboBoxItem>
+                    <ComboBoxItem>Техно</ComboBoxItem>
+                    <ComboBoxItem>Винтаж</ComboBoxItem>
+                </ComboBox>
+            </GroupBox>
+
+            <!-- Цветовая палитра -->
+            <GroupBox Grid.Column="1" Header="Цветовая палитра" Margin="5,0">
+                <ComboBox x:Name="PaletteComboBox" SelectedIndex="0">
+                    <ComboBoxItem>Нейтральная</ComboBoxItem>
+                    <ComboBoxItem>Теплые тона</ComboBoxItem>
+                    <ComboBoxItem>Холодные тона</ComboBoxItem>
+                    <ComboBoxItem>Яркие цвета</ComboBoxItem>
+                    <ComboBoxItem>Пастельные</ComboBoxItem>
+                    <ComboBoxItem>Монохром</ComboBoxItem>
+                </ComboBox>
+            </GroupBox>
+
+            <!-- Соотношение сторон -->
+            <GroupBox Grid.Column="2" Header="Соотношение сторон" Margin="5,0">
+                <ComboBox x:Name="AspectComboBox" SelectedIndex="0">
+                    <ComboBoxItem>16:9 (широкоформатный)</ComboBoxItem>
+                    <ComboBoxItem>4:3 (стандартный)</ComboBoxItem>
+                    <ComboBoxItem>1:1 (квадрат)</ComboBoxItem>
+                    <ComboBoxItem>21:9 (ультраширокий)</ComboBoxItem>
+                    <ComboBoxItem>9:16 (вертикальный)</ComboBoxItem>
+                </ComboBox>
+            </GroupBox>
+        </Grid>
+
+        <!-- Кнопки управления -->
+        <StackPanel Grid.Row="3" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    Margin="0,0,0,10">
+            <Button x:Name="GenerateButton" 
+                    Content="Создать изображение" 
+                    Width="150" 
+                    Height="35" 
+                    Margin="5"
+                    Click="GenerateButton_Click"/>
+
+            <Button x:Name="HolidayButton" 
+                    Content="Праздничные обои" 
+                    Width="150" 
+                    Height="35" 
+                    Margin="5"
+                    Click="HolidayButton_Click"/>
+
+            <Button x:Name="SetWallpaperButton" 
+                    Content="Установить обои" 
+                    Width="150" 
+                    Height="35" 
+                    Margin="5"
+                    IsEnabled="False"
+                    Click="SetWallpaperButton_Click"/>
+        </StackPanel>
+
+        <!-- Область предпросмотра -->
+        <GroupBox Grid.Row="4" Header="Предпросмотр" Margin="0,0,0,10">
+            <Image x:Name="PreviewImage" 
+                   Stretch="Uniform"/>
+        </GroupBox>
+
+        <!-- Статус -->
+        <TextBlock Grid.Row="5" 
+                   x:Name="StatusTextBlock" 
+                   Text="Готов к работе" 
+                   HorizontalAlignment="Center"/>
+        </Grid>
+</Window>

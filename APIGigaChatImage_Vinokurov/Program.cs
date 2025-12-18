@@ -127,7 +127,7 @@ namespace APIGigaChatImage_Vinokurov
 
                             byte[] bytes = await fileResp.Content.ReadAsByteArrayAsync();
                             string outPath = Path.Combine(Environment.CurrentDirectory, $"gigachat_{firstFileId}.jpg");
-                            await File.WriteAllBytesAsync(outPath, bytes);
+                            File.WriteAllBytes(outPath, bytes);
                             Console.WriteLine($"Первое изображение сохранено: {outPath}");
 
                             Console.Write("Установить это изображение как обои? (д/н): ");
@@ -321,7 +321,7 @@ namespace APIGigaChatImage_Vinokurov
 
                             var bytes = await fileResp.Content.ReadAsByteArrayAsync();
                             string outPath = Path.Combine(Environment.CurrentDirectory, $"gigachat_{fileId}.jpg");
-                            await File.WriteAllBytesAsync(outPath, bytes);
+                            File.WriteAllBytes(outPath, bytes);
                             Console.WriteLine($"Изображение сохранено: {outPath}");
                             return outPath;
                         }
