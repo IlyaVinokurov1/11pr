@@ -33,7 +33,6 @@ namespace APIGigaChatImageWPF
             await InitializeApplication();
         }
 
-        // Инициализация приложения
         private async Task InitializeApplication()
         {
             StatusTextBlock.Text = "Получение токена доступа...";
@@ -42,7 +41,6 @@ namespace APIGigaChatImageWPF
             if (currentToken != null)
             {
                 StatusTextBlock.Text = "Токен получен. Готов к работе.";
-                // Функция для оценки "ОТЛИЧНО" - интеграция с календарем
                 await CheckHolidayAndSuggest();
             }
             else
@@ -54,8 +52,6 @@ namespace APIGigaChatImageWPF
                                 MessageBoxImage.Error);
             }
         }
-
-        // Получение токена
         private async Task<string> GetAccessToken()
         {
             try
@@ -105,26 +101,19 @@ namespace APIGigaChatImageWPF
                 return null;
             }
         }
-
         private class TokenData
         {
             public string access_token { get; set; }
             public string expires_at { get; set; }
         }
-
-        // Обработка кнопки "Создать изображение"
         private async void GenerateButton_Click(object sender, RoutedEventArgs e)
         {
             await GenerateImage(false);
         }
-
-        // Обработка кнопки "Праздничные обои" - для оценки "ОТЛИЧНО"
         private async void HolidayButton_Click(object sender, RoutedEventArgs e)
         {
             await GenerateImage(true);
         }
-
-        // Основной метод генерации изображения
         private async Task GenerateImage(bool isHolidayTheme)
         {
             if (currentToken == null)
@@ -158,13 +147,9 @@ namespace APIGigaChatImageWPF
                 prompt = DescriptionTextBox.Text;
                 StatusTextBlock.Text = "Создаю изображение...";
             }
-
-            // ФУНКЦИОНАЛ ДЛЯ ОЦЕНКИ "ХОРОШО": получение параметров
             string style = GetSelectedStyle();
             string palette = GetSelectedPalette();
             string aspect = GetSelectedAspect();
-
-            // Формирование промпта с параметрами
             string fullPrompt = BuildPromptWithParameters(prompt, style, palette, aspect, isHolidayTheme);
 
             try
@@ -199,8 +184,6 @@ namespace APIGigaChatImageWPF
                                 MessageBoxImage.Error);
             }
         }
-
-        // ФУНКЦИОНАЛ ДЛЯ ОЦЕНКИ "ХОРОШО": получение выбранных параметров
         private string GetSelectedStyle()
         {
             return (StyleComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Реалистичный";
@@ -216,7 +199,6 @@ namespace APIGigaChatImageWPF
             return (AspectComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "16:9 (широкоформатный)";
         }
 
-        // Формирование промпта с параметрами
         private string BuildPromptWithParameters(string basePrompt, string style, string palette, string aspect, bool isHoliday)
         {
             string styleText = style.ToLower();
@@ -243,8 +225,6 @@ namespace APIGigaChatImageWPF
             if (aspect.Contains("9:16")) return "вертикальная ориентация";
             return "широкоформатное изображение";
         }
-
-        // Создание изображения через API
         private async Task<string> CreateImage(string prompt)
         {
             try
@@ -371,8 +351,6 @@ namespace APIGigaChatImageWPF
                 Console.WriteLine($"Ошибка загрузки предпросмотра: {ex.Message}");
             }
         }
-
-        // ФУНКЦИОНАЛ ДЛЯ ОЦЕНКИ "ОТЛИЧНО": интеграция с календарем
         private async Task CheckHolidayAndSuggest()
         {
             string holidayName = GetCurrentHolidayName();
@@ -392,8 +370,6 @@ namespace APIGigaChatImageWPF
                 }
             }
         }
-
-        // Определение праздничного промпта
         private string GetHolidayPrompt()
         {
             DateTime today = DateTime.Today;
@@ -423,8 +399,6 @@ namespace APIGigaChatImageWPF
 
             return "красивые обои для рабочего стола";
         }
-
-        // Получение названия праздника
         private string GetCurrentHolidayName()
         {
             DateTime today = DateTime.Today;
@@ -443,8 +417,6 @@ namespace APIGigaChatImageWPF
 
             return "Текущий день";
         }
-
-        // Установка обоев
         private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(currentImagePath) && File.Exists(currentImagePath))
@@ -474,8 +446,6 @@ namespace APIGigaChatImageWPF
                                 MessageBoxImage.Warning);
             }
         }
-
-        // Класс для установки обоев
         private static class WallpaperHelper
         {
             private const int SPI_SETDESKWALLPAPER = 20;
