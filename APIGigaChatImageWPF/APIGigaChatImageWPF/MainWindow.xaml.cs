@@ -35,23 +35,9 @@ namespace APIGigaChatImageWPF
 
         private async Task InitializeApplication()
         {
-            StatusTextBlock.Text = "Получение токена доступа...";
             currentToken = await GetAccessToken();
-
-            if (currentToken != null)
-            {
-                StatusTextBlock.Text = "Токен получен. Готов к работе.";
-                await CheckHolidayAndSuggest();
-            }
-            else
-            {
-                StatusTextBlock.Text = "Ошибка получения токена";
-                MessageBox.Show("Не удалось получить доступ к API GigaChat. Проверьте подключение к интернету и ключи доступа.",
-                                "Ошибка подключения",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
-            }
         }
+
         private async Task<string> GetAccessToken()
         {
             try
@@ -101,20 +87,25 @@ namespace APIGigaChatImageWPF
                 return null;
             }
         }
+
         private class TokenData
         {
             public string access_token { get; set; }
             public string expires_at { get; set; }
         }
+
         private async void GenerateButton_Click(object sender, RoutedEventArgs e)
         {
-            await GenerateImage(false);
+            await GenerateImage();
         }
-        private async void HolidayButton_Click(object sender, RoutedEventArgs e)
+
+        private void HolidayButton_Click(object sender, RoutedEventArgs e)
         {
-            await GenerateImage(true);
+            // Просто вставляем праздничный промпт в TextBox
+            DescriptionTextBox.Text = GetHolidayPrompt();
         }
-        private async Task GenerateImage(bool isHolidayTheme)
+
+        private async Task GenerateImage()
         {
             if (currentToken == null)
             {
@@ -125,32 +116,21 @@ namespace APIGigaChatImageWPF
                 return;
             }
 
-            string prompt;
+            if (string.IsNullOrWhiteSpace(DescriptionTextBox.Text) ||
+                DescriptionTextBox.Text == "Введите описание для генерации")
+            {
+                MessageBox.Show("Введите описание изображения",
+                                "Внимание",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                return;
+            }
 
-            if (isHolidayTheme)
-            {
-                prompt = GetHolidayPrompt();
-                DescriptionTextBox.Text = prompt;
-                StatusTextBlock.Text = "Создаю праздничные обои...";
-            }
-            else
-            {
-                if (string.IsNullOrWhiteSpace(DescriptionTextBox.Text) ||
-                    DescriptionTextBox.Text == "Введите описание для генерации")
-                {
-                    MessageBox.Show("Введите описание изображения",
-                                    "Внимание",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Information);
-                    return;
-                }
-                prompt = DescriptionTextBox.Text;
-                StatusTextBlock.Text = "Создаю изображение...";
-            }
+            string prompt = DescriptionTextBox.Text;
             string style = GetSelectedStyle();
             string palette = GetSelectedPalette();
             string aspect = GetSelectedAspect();
-            string fullPrompt = BuildPromptWithParameters(prompt, style, palette, aspect, isHolidayTheme);
+            string fullPrompt = BuildPromptWithParameters(prompt, style, palette, aspect);
 
             try
             {
@@ -161,14 +141,9 @@ namespace APIGigaChatImageWPF
                     currentImagePath = imagePath;
                     ShowImagePreview(imagePath);
                     SetWallpaperButton.IsEnabled = true;
-
-                    StatusTextBlock.Text = isHolidayTheme ?
-                        "Праздничные обои созданы!" :
-                        "Изображение создано!";
                 }
                 else
                 {
-                    StatusTextBlock.Text = "Ошибка создания изображения";
                     MessageBox.Show("Не удалось создать изображение. Попробуйте другой запрос.",
                                     "Ошибка",
                                     MessageBoxButton.OK,
@@ -177,13 +152,13 @@ namespace APIGigaChatImageWPF
             }
             catch (Exception ex)
             {
-                StatusTextBlock.Text = "Ошибка";
                 MessageBox.Show($"Ошибка: {ex.Message}",
                                 "Исключение",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }
         }
+
         private string GetSelectedStyle()
         {
             return (StyleComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Реалистичный";
@@ -191,40 +166,30 @@ namespace APIGigaChatImageWPF
 
         private string GetSelectedPalette()
         {
-            return (PaletteComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Нейтральная";
+            return (PaletteComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Теплые тона";
         }
 
         private string GetSelectedAspect()
         {
-            return (AspectComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "16:9 (широкоформатный)";
+            return (AspectComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "16:9";
         }
 
-        private string BuildPromptWithParameters(string basePrompt, string style, string palette, string aspect, bool isHoliday)
+        private string BuildPromptWithParameters(string basePrompt, string style, string palette, string aspect)
         {
             string styleText = style.ToLower();
             string paletteText = palette.ToLower();
             string aspectText = GetAspectDescription(aspect);
-            string additional = "высокое качество, детализированное, профессиональная графика, подходит для обоев рабочего стола";
 
-            if (isHoliday)
-            {
-                return $"{basePrompt}, в стиле {styleText}, цветовая гамма: {paletteText}, {aspectText}, {additional}, праздничная тематика";
-            }
-            else
-            {
-                return $"{basePrompt}, стиль: {styleText}, палитра: {paletteText}, {aspectText}, {additional}";
-            }
+            return $"{basePrompt}, стиль: {styleText}, палитра: {paletteText}, {aspectText}, подходит для обоев рабочего стола";
         }
 
         private string GetAspectDescription(string aspect)
         {
             if (aspect.Contains("16:9")) return "широкоформатное изображение 16:9";
             if (aspect.Contains("4:3")) return "стандартное соотношение 4:3";
-            if (aspect.Contains("1:1")) return "квадратное изображение";
-            if (aspect.Contains("21:9")) return "ультраширокий формат 21:9";
-            if (aspect.Contains("9:16")) return "вертикальная ориентация";
             return "широкоформатное изображение";
         }
+
         private async Task<string> CreateImage(string prompt)
         {
             try
@@ -351,72 +316,21 @@ namespace APIGigaChatImageWPF
                 Console.WriteLine($"Ошибка загрузки предпросмотра: {ex.Message}");
             }
         }
-        private async Task CheckHolidayAndSuggest()
-        {
-            string holidayName = GetCurrentHolidayName();
 
-            if (!string.IsNullOrEmpty(holidayName) && holidayName != "Текущий день")
-            {
-                var result = MessageBox.Show($"Сегодня {holidayName}. Создать тематические обои?",
-                                             "Праздничные обои",
-                                             MessageBoxButton.YesNo,
-                                             MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    string prompt = GetHolidayPrompt();
-                    DescriptionTextBox.Text = prompt;
-                    await GenerateImage(true);
-                }
-            }
-        }
         private string GetHolidayPrompt()
         {
             DateTime today = DateTime.Today;
 
             if (today.Month == 12 && today.Day >= 20 && today.Day <= 31)
-                return "новогодняя тема, елка, снег, подарки, праздничное настроение";
+                return "зима перед новым годом";
             if (today.Month == 1 && today.Day == 1)
-                return "новый год, праздник, начало, салют, веселье";
-            if (today.Month == 1 && today.Day == 7)
-                return "рождество, зимняя сказка, церковь, свечи";
+                return "новый год праздник веселье";
             if (today.Month == 2 && today.Day == 23)
-                return "23 февраля, защитник отечества, военная тема, флаг";
-            if (today.Month == 3 && today.Day == 8)
-                return "8 марта, весна, цветы, женский день, тюльпаны";
-            if (today.Month == 5 && today.Day == 9)
-                return "день победы, георгиевская лента, память, уважение";
-            if (today.Month == 6 && today.Day == 12)
-                return "день России, флаг, патриотизм, страна";
-            if (today.Month == 12 || today.Month == 1 || today.Month == 2)
-                return "зимний пейзаж, снег, мороз, уют, зима";
-            if (today.Month >= 3 && today.Month <= 5)
-                return "весенний пейзаж, цветение, пробуждение природы, весна";
-            if (today.Month >= 6 && today.Month <= 8)
-                return "летний пейзаж, солнце, море, природа, лето";
-            if (today.Month >= 9 && today.Month <= 11)
-                return "осенний лес, золотые листья, уют, осень";
+                return "23 февраля защитник отечества военная тема флаг";
 
             return "красивые обои для рабочего стола";
         }
-        private string GetCurrentHolidayName()
-        {
-            DateTime today = DateTime.Today;
 
-            if (today.Month == 12 && today.Day >= 20 && today.Day <= 31) return "Новогодний период";
-            if (today.Month == 1 && today.Day == 1) return "Новый Год";
-            if (today.Month == 1 && today.Day == 7) return "Рождество";
-            if (today.Month == 2 && today.Day == 23) return "День защитника Отечества";
-            if (today.Month == 3 && today.Day == 8) return "Международный женский день";
-            if (today.Month == 5 && today.Day == 9) return "День Победы";
-            if (today.Month == 6 && today.Day == 12) return "День России";
-            if (today.Month == 12 || today.Month == 1 || today.Month == 2) return "Зима";
-            if (today.Month >= 3 && today.Month <= 5) return "Весна";
-            if (today.Month >= 6 && today.Month <= 8) return "Лето";
-            if (today.Month >= 9 && today.Month <= 11) return "Осень";
-
-            return "Текущий день";
-        }
         private void SetWallpaperButton_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(currentImagePath) && File.Exists(currentImagePath))
@@ -424,7 +338,6 @@ namespace APIGigaChatImageWPF
                 try
                 {
                     WallpaperHelper.SetAsWallpaper(currentImagePath);
-                    StatusTextBlock.Text = "Обои установлены!";
                     MessageBox.Show("Изображение успешно установлено как фон рабочего стола",
                                     "Успех",
                                     MessageBoxButton.OK,
@@ -446,6 +359,7 @@ namespace APIGigaChatImageWPF
                                 MessageBoxImage.Warning);
             }
         }
+
         private static class WallpaperHelper
         {
             private const int SPI_SETDESKWALLPAPER = 20;
